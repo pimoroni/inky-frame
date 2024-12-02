@@ -64,7 +64,7 @@ jobs:
       run: |
         source $CI_PROJECT_ROOT/ci/micropython.sh && ci_debug
         ci_cmake_build ${{ matrix.name }}
-        mv "$CI_BUILD_ROOT/build-${{ matrix.name }}.uf2" "$CI_BUILD_ROOT/$RELEASE_FILE.uf2"
+        mv "$CI_BUILD_ROOT/${{ matrix.name }}.uf2" "$CI_BUILD_ROOT/$RELEASE_FILE.uf2"
 
     - name: "Artifacts: Upload .uf2"
       uses: actions/upload-artifact@v4
