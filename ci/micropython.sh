@@ -77,8 +77,9 @@ function ci_prepare_all {
 
 function ci_github_actions_fixup {
     # GitHub Actions meddles with . and source causing our paths to be broken
-    # This fixup attempts to put things right
-    export CI_PROJECT_ROOT="$(pwd)"
+    # This fixup attempts to put things right\
+    SCRIPT_PATH=$1
+    CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
     export CI_BUILD_ROOT="$(pwd)/build"
     mkdir -p "$CI_BUILD_ROOT"
     log_inform "Project root: $CI_PROJECT_ROOT"

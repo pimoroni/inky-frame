@@ -46,21 +46,21 @@ jobs:
     - name: "Prepare tools & dependencies"
       shell: bash
       run: |
-        source $BUILD_TOOLS && ci_github_actions_fixup
+        source $BUILD_TOOLS && ci_github_actions_fixup $BUILD_TOOLS
         ci_apt_install_build_deps
         ci_prepare_all
 
     - name: "MicroPython: Configure"
       shell: bash
       run: |
-        source $BUILD_TOOLS && ci_github_actions_fixup
+        source $BUILD_TOOLS && ci_github_actions_fixup $BUILD_TOOLS
         micropython_version
         ci_cmake_configure ${{ matrix.name }}
 
     - name: "MicroPython: Build"
       shell: bash
       run: |
-        source $BUILD_TOOLS && ci_github_actions_fixup
+        source $BUILD_TOOLS && ci_github_actions_fixup $BUILD_TOOLS
         ci_cmake_build ${{ matrix.name }}
         mv build-${{ matrix.name }}.uf2 ${{ env.RELEASE_FILE }}.uf2
 
