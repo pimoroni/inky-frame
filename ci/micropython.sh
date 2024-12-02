@@ -9,9 +9,14 @@ PIMORONI_PICO_VERSION="feature/inky-pico2_w"
 PY_DECL_VERSION="v0.0.3"
 DIR2UF2_VERSION="v0.0.9"
 
-SCRIPT_PATH="$(dirname $0)"
-CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
-CI_BUILD_ROOT=$(pwd)
+if [ -z ${CI_PROJECT_ROOT+x} ]; then
+    SCRIPT_PATH="$(dirname $0)"
+    CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
+fi
+
+if [ -z ${CI_BUILD_ROOT+x} ]; then
+    CI_BUILD_ROOT=$(pwd)
+fi
 
 
 function log_success {

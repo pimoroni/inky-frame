@@ -20,7 +20,8 @@ jobs:
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
       RELEASE_FILE: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
-      BUILD_TOOLS: src-${{ github.sha }}/ci/micropython.sh
+      CI_PROJECT_ROOT: src-${{ github.sha }}
+      CI_BUILD_ROOT: ${{ github.workspace }}
 
     steps:
     - name: "CCache: Restore saved cache"
@@ -46,21 +47,21 @@ jobs:
     - name: "Prepare tools & dependencies"
       shell: bash
       run: |
-        source $BUILD_TOOLS && ci_github_actions_fixup $BUILD_TOOLS
+        source $CI_PROJECT_ROOT/ci/micropython.sh
         ci_apt_install_build_deps
         ci_prepare_all
 
     - name: "MicroPython: Configure"
       shell: bash
       run: |
-        source $BUILD_TOOLS && ci_github_actions_fixup $BUILD_TOOLS
+        source $CI_PROJECT_ROOT/ci/micropython.sh
         micropython_version
         ci_cmake_configure ${{ matrix.name }}
 
     - name: "MicroPython: Build"
       shell: bash
       run: |
-        source $BUILD_TOOLS && ci_github_actions_fixup $BUILD_TOOLS
+        source $CI_PROJECT_ROOT/ci/micropython.sh
         ci_cmake_build ${{ matrix.name }}
         mv build-${{ matrix.name }}.uf2 ${{ env.RELEASE_FILE }}.uf2
 
