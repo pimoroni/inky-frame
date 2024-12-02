@@ -112,5 +112,6 @@ function ci_cmake_build {
     cp build-$BOARD/firmware.uf2 $BOARD.uf2
 }
 
+log_inform "Script path: $SCRIPT_PATH"
 log_inform "Project root: $CI_PROJECT_ROOT"
 log_inform "Build root: $CI_BUILD_ROOT"
