@@ -44,6 +44,7 @@ jobs:
         release: '13.3.Rel1'
 
     - name: "Prepare tools & dependencies"
+      shell: bash
       run: |
         source $BUILD_TOOLS
         ci_apt_install_build_deps

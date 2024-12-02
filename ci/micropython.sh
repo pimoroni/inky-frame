@@ -10,7 +10,7 @@ PY_DECL_VERSION="v0.0.3"
 DIR2UF2_VERSION="v0.0.9"
 
 SCRIPT_PATH="$(dirname $0)"
-PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
+CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
 CI_BUILD_ROOT=$(pwd)
 
 
@@ -83,12 +83,12 @@ function micropython_version {
 
 function ci_cmake_configure {
     BOARD=$1
-    MICROPY_BOARD_DIR=$CI_BUILD_ROOT/boards/$BOARD
+    MICROPY_BOARD_DIR=$CI_PROJECT_ROOT/boards/$BOARD
     if [ ! -f "$MICROPY_BOARD_DIR/usermodules.cmake" ]; then
         log_warning "Invalid board: $MICROPY_BOARD_DIR"
         return 1
     fi
-    cmake -S $PROJECT_ROOT/micropython/ports/rp2 -B build-$BOARD \
+    cmake -S $CI_BUILD_ROOT/micropython/ports/rp2 -B build-$BOARD \
     -DPICOTOOL_FORCE_FETCH_FROM_GIT=1 \
     -DPICO_BUILD_DOCS=0 \
     -DPICO_NO_COPRO_DIS=1 \
@@ -112,5 +112,5 @@ function ci_cmake_build {
     cp build-$BOARD/firmware.uf2 $BOARD.uf2
 }
 
-log_inform "Project root: $PROJECT_ROOT"
+log_inform "Project root: $CI_PROJECT_ROOT"
 log_inform "Build root: $CI_BUILD_ROOT"
