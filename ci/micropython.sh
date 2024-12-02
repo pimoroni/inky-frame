@@ -80,13 +80,7 @@ function ci_prepare_all {
     ci_micropython_build_mpy_cross
 }
 
-function ci_github_actions_fixup {
-    # GitHub Actions meddles with . and source causing our paths to be broken
-    # This fixup attempts to put things right\
-    SCRIPT_PATH=$1
-    CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
-    export CI_BUILD_ROOT="$(pwd)/build"
-    mkdir -p "$CI_BUILD_ROOT"
+function ci_debug {
     log_inform "Project root: $CI_PROJECT_ROOT"
     log_inform "Build root: $CI_BUILD_ROOT"
 }

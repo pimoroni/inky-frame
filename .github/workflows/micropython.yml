@@ -20,7 +20,7 @@ jobs:
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
       RELEASE_FILE: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
-      CI_PROJECT_ROOT: src-${{ github.sha }}
+      CI_PROJECT_ROOT: ${{ github.workspace }}/src-${{ github.sha }}
       CI_BUILD_ROOT: ${{ github.workspace }}
 
     steps:
@@ -37,7 +37,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: true
-        path: src-${{ github.sha }}
+        path: ${{ env.CI_PROJECT_ROOT }}
 
     - name: "Install Arm GNU Toolchain (arm-none-eabi-gcc)"
       uses: carlosperate/arm-none-eabi-gcc-action@v1
@@ -47,21 +47,22 @@ jobs:
     - name: "Prepare tools & dependencies"
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
+        source $CI_PROJECT_ROOT/ci/micropython.sh && ci_debug
+        mkdir -p $CI_BUILD_ROOT
         ci_apt_install_build_deps
         ci_prepare_all
 
     - name: "MicroPython: Configure"
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
+        source $CI_PROJECT_ROOT/ci/micropython.sh && ci_debug
         micropython_version
         ci_cmake_configure ${{ matrix.name }}
 
     - name: "MicroPython: Build"
       shell: bash
       run: |
-        source $CI_PROJECT_ROOT/ci/micropython.sh
+        source $CI_PROJECT_ROOT/ci/micropython.sh && ci_debug
         ci_cmake_build ${{ matrix.name }}
         mv build-${{ matrix.name }}.uf2 ${{ env.RELEASE_FILE }}.uf2
 
