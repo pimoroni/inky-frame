@@ -75,6 +75,16 @@ function ci_prepare_all {
     ci_micropython_build_mpy_cross
 }
 
+function ci_github_actions_fixup {
+    # GitHub Actions meddles with . and source causing our paths to be broken
+    # This fixup attempts to put things right
+    export CI_PROJECT_ROOT="$(pwd)"
+    export CI_BUILD_ROOT="$(pwd)/build"
+    mkdir -p "$CI_BUILD_ROOT"
+    log_inform "Project root: $CI_PROJECT_ROOT"
+    log_inform "Build root: $CI_BUILD_ROOT"
+}
+
 function micropython_version {
     BOARD=$1
     echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, $BOARD $TAG_OR_SHA" >> $GITHUB_ENV
@@ -111,7 +121,3 @@ function ci_cmake_build {
     log_inform "Copying .uf2 to $(pwd)/$BOARD.uf2"
     cp build-$BOARD/firmware.uf2 $BOARD.uf2
 }
-
-log_inform "Script path: $SCRIPT_PATH"
-log_inform "Project root: $CI_PROJECT_ROOT"
-log_inform "Build root: $CI_BUILD_ROOT"
