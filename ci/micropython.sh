@@ -70,7 +70,7 @@ function ci_micropython_build_mpy_cross {
 }
 
 function ci_apt_install_build_deps {
-    sudo apt update && sudo apt install ccache
+    sudo apt update && sudo apt install ccache python3-virtualenvwrapper virtualenvwrapper
 }
 
 function ci_prepare_all {
@@ -98,7 +98,8 @@ function ci_cmake_configure {
         log_warning "Invalid board: $MICROPY_BOARD_DIR"
         return 1
     fi
-    cmake -S $CI_BUILD_ROOT/micropython/ports/rp2 -B build-$BOARD \
+    BUILD_DIR="$CI_BUILD_ROOT/build-$BOARD"
+    cmake -S $CI_BUILD_ROOT/micropython/ports/rp2 -B "$BUILD_DIR" \
     -DPICOTOOL_FORCE_FETCH_FROM_GIT=1 \
     -DPICO_BUILD_DOCS=0 \
     -DPICO_NO_COPRO_DIS=1 \
@@ -112,13 +113,23 @@ function ci_cmake_configure {
 
 function ci_cmake_build {
     BOARD=$1
+    MICROPY_BOARD_DIR=$CI_PROJECT_ROOT/boards/$BOARD
+    EXAMPLES_DIR=$CI_PROJECT_ROOT/examples/inkylauncher/
+    TOOLS_DIR=$CI_BUILD_ROOT/tools
+    BUILD_DIR="$CI_BUILD_ROOT/build-$BOARD"
     ccache --zero-stats || true
-    cmake --build build-$BOARD -j 2
+    cmake --build $BUILD_DIR -j 2
     ccache --show-stats || true
-    if [ -d "tools/py_decl" ]; then
+    if [ -d "$TOOLS_DIR/py_decl" ]; then
         log_inform "Tools found, verifying .uf2 with py_decl..."
-        python3 tools/py_decl/py_decl.py --to-json --verify "build-$BOARD/firmware.uf2"
+        python3 "$TOOLS_DIR/py_decl/py_decl.py" --to-json --verify "$BUILD_DIR/firmware.uf2"
     fi
     log_inform "Copying .uf2 to $(pwd)/$BOARD.uf2"
-    cp build-$BOARD/firmware.uf2 $BOARD.uf2
+    cp "$BUILD_DIR/firmware.uf2" $BOARD.uf2
+
+    if [ -f "$MICROPY_BOARD_DIR/manifest.txt" ] && [ -d "$TOOLS_DIR/dir2uf2" ]; then
+        log_inform "Creating $(pwd)/$BOARD-with-filesystem.uf2"
+        python3 -m pip install littlefs-python==0.12.0
+        $TOOLS_DIR/dir2uf2/dir2uf2 --fs-compact --sparse --append-to "$(pwd)/$BOARD.uf2" --manifest "$MICROPY_BOARD_DIR/manifest.txt" --filename with-filesystem.uf2 "$EXAMPLES_DIR"
+    fi
 }

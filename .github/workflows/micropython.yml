@@ -63,22 +63,32 @@ jobs:
       shell: bash
       run: |
         source $CI_PROJECT_ROOT/ci/micropython.sh && ci_debug
+        source $(dpkg -L virtualenvwrapper | grep "virtualenvwrapper.sh")
+        mkvirtualenv "dir2uf2"
         ci_cmake_build ${{ matrix.name }}
         mv "$CI_BUILD_ROOT/${{ matrix.name }}.uf2" "$CI_BUILD_ROOT/$RELEASE_FILE.uf2"
+        mv "$CI_BUILD_ROOT/${{ matrix.name }}-with-filesystem.uf2" "$CI_BUILD_ROOT/$RELEASE_FILE-with-filesystem.uf2"
 
     - name: "Artifacts: Upload .uf2"
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.RELEASE_FILE }}.uf2
         path: ${{ env.CI_BUILD_ROOT }}/${{ env.RELEASE_FILE }}.uf2
+        
+    - name: "Artifacts: Upload .uf2 (With Filesystem)"
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.RELEASE_FILE }}.uf2
+        path: ${{ env.CI_BUILD_ROOT }}/${{ env.RELEASE_FILE }}-with-filesystem.uf2
 
     - name: "Release: Upload .uf2"
       if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
-        asset_path: ${{ env.CI_BUILD_ROOT }}/${{ env.RELEASE_FILE }}.uf2
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_name: ${{ env.RELEASE_FILE }}.uf2
-        asset_content_type: application/octet-stream
+        files: ${{ env.CI_BUILD_ROOT }}/${{ env.RELEASE_FILE }}.uf2
+
+    - name: "Release: Upload .uf2 (With Filesystem)"
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{ env.CI_BUILD_ROOT }}/${{ env.RELEASE_FILE }}-with-filesystem.uf2
