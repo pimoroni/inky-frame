@@ -1,0 +1,81 @@
+name: MicroPython
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: MicroPython ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      matrix:
+        include:
+        - name: pico_w_inky
+        - name: pico2_w_inky
+
+    env:
+      # MicroPython version will be contained in github.event.release.tag_name for releases
+      RELEASE_FILE: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
+      BUILD_TOOLS: src-${{ github.sha }}/ci/micropython.sh
+
+    steps:
+    - name: "CCache: Restore saved cache"
+      uses: actions/cache@v4
+      with:
+        path: /home/runner/.ccache
+        key: ccache-micropython-${{ matrix.name }}-${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+          ccache-micropython-${{ matrix.name }}-${{ github.ref }}
+          ccache-micropython-${{ matrix.name }}-
+
+    - name: "Checkout Project"
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        path: src-${{ github.sha }}
+
+    - name: "Install Arm GNU Toolchain (arm-none-eabi-gcc)"
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '13.3.Rel1'
+
+    - name: "Prepare tools & dependencies"
+      run: |
+        source $BUILD_TOOLS
+        ci_apt_install_build_deps
+        ci_prepare_all
+
+    - name: "MicroPython: Configure"
+      shell: bash
+      run: |
+        source $BUILD_TOOLS
+        micropython_version
+        ci_cmake_configure ${{ matrix.name }}
+
+    - name: "MicroPython: Build"
+      shell: bash
+      run: |
+        source $BUILD_TOOLS
+        ci_cmake_build ${{ matrix.name }}
+        mv build-${{ matrix.name }}.uf2 ${{ env.RELEASE_FILE }}.uf2
+
+    - name: "Artifacts: Upload .uf2"
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.RELEASE_FILE }}.uf2
+        path: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
+
+    - name: "Release: Upload .uf2"
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        asset_path: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: ${{ env.RELEASE_FILE }}.uf2
+        asset_content_type: application/octet-stream
