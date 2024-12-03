@@ -17,6 +17,11 @@ flashing "-with-examples" - *your files will be erased!*
 
 You can find the latest release at [https://github.com/pimoroni/inky-frame/releases/latest](https://github.com/pimoroni/inky-frame/releases/latest).
 
+## Guides & Documentation
+
+* [Getting Started With Inky Frame](https://learn.pimoroni.com/article/getting-started-with-inky-frame)
+* [inky_frame Module Reference](docs/inky_frame.md)
+
 ## Get Inky Frame
 
 * [Inky Frame 7.3"](https://shop.pimoroni.com/products/inky-frame-7-3?variant=40541882056787)
