@@ -60,7 +60,7 @@ def launcher():
     graphics.set_pen(2)
     graphics.rectangle(30, HEIGHT - (220 + y_offset), WIDTH - 200, 50)
     graphics.set_pen(1)
-    graphics.text("C. Daily Activity", 35, HEIGHT - (205 + y_offset), 600, 3)
+    graphics.text("C. Daily XKCD", 35, HEIGHT - (205 + y_offset), 600, 3)
 
     graphics.set_pen(3)
     graphics.rectangle(30, HEIGHT - (160 + y_offset), WIDTH - 250, 50)
@@ -70,7 +70,7 @@ def launcher():
     graphics.set_pen(0)
     graphics.rectangle(30, HEIGHT - (100 + y_offset), WIDTH - 300, 50)
     graphics.set_pen(1)
-    graphics.text("E. Random Joke", 35, HEIGHT - (85 + y_offset), 600, 3)
+    graphics.text("E. Carbon Intensity", 35, HEIGHT - (85 + y_offset), 600, 3)
 
     graphics.set_pen(graphics.create_pen(220, 220, 220))
     graphics.rectangle(WIDTH - 100, HEIGHT - (340 + y_offset), 70, 50)
@@ -107,7 +107,7 @@ def launcher():
             reset()
         if ih.inky_frame.button_c.read():
             ih.inky_frame.button_c.led_on()
-            ih.update_state("daily_activity")
+            ih.update_state("daily_xkcd")
             time.sleep(0.5)
             reset()
         if ih.inky_frame.button_d.read():
@@ -117,7 +117,7 @@ def launcher():
             reset()
         if ih.inky_frame.button_e.read():
             ih.inky_frame.button_e.led_on()
-            ih.update_state("random_joke")
+            ih.update_state("carbon_intensity")
             time.sleep(0.5)
             reset()
 
