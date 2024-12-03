@@ -5,11 +5,8 @@
 #define MICROPY_HW_FLASH_STORAGE_BYTES          (PICO_FLASH_SIZE_BYTES - (1200 * 1024))
 
 // Enable networking.
-#define MICROPY_PY_NETWORK                      (1)
 #define MICROPY_PY_NETWORK_PPP_LWIP             (1)
 #define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT     "InkyW"
-
-// CYW43 driver configuration.
 #include "enable_cyw43.h"
 
 // For debugging mbedtls - also set
