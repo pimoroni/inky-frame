@@ -56,9 +56,8 @@ include(servo/micropython)
 include(encoder/micropython)
 include(motor/micropython)
 
+# Still required for version.py
 include(modules_py/modules_py)
-
-copy_module(inky_frame.py)
 
 # C++ Magic Memory
 include(cppmem/micropython)
