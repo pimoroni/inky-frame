@@ -4,7 +4,7 @@ MICROPYTHON_FLAVOUR="peterharperuk"
 MICROPYTHON_VERSION="pico2_w_changes"
 
 PIMORONI_PICO_FLAVOUR="pimoroni"
-PIMORONI_PICO_VERSION="feature/inky-pico2_w"
+PIMORONI_PICO_VERSION="feature/picovector2-and-layers"
 
 PY_DECL_VERSION="v0.0.3"
 DIR2UF2_VERSION="v0.0.9"
