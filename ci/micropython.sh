@@ -9,15 +9,6 @@ PIMORONI_PICO_VERSION="feature/picovector2-and-layers"
 PY_DECL_VERSION="v0.0.3"
 DIR2UF2_VERSION="v0.0.9"
 
-if [ -z ${CI_PROJECT_ROOT+x} ]; then
-    SCRIPT_PATH="$(dirname $0)"
-    CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
-fi
-
-if [ -z ${CI_BUILD_ROOT+x} ]; then
-    CI_BUILD_ROOT=$(pwd)
-fi
-
 
 function log_success {
 	echo -e "$(tput setaf 2)$1$(tput sgr0)"
@@ -134,3 +125,14 @@ function ci_cmake_build {
         cp "$BUILD_DIR/firmware-with-filesystem.uf2" $BOARD-with-filesystem.uf2
     fi
 }
+
+SCRIPT_PATH="$(dirname $0)"
+CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
+if [ ! -f "$CI_PROJECT_ROOT/ci/micropython.sh" ]; then
+    log_warning "Could not find a valid CI_PROJECT_ROOT!"
+    return 1
+fi
+
+CI_BUILD_ROOT=$(pwd)
+
+ci_debug
