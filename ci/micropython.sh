@@ -127,13 +127,10 @@ function ci_cmake_build {
     fi
 }
 
-SCRIPT_PATH="$(dirname $0)"
-CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
-if [ ! -f "$CI_PROJECT_ROOT/ci/micropython.sh" ]; then
-    log_warning "Could not find a valid CI_PROJECT_ROOT!"
-    return 1
+if [ -z ${CI_USE_ENV+x} ] || [ -z ${CI_PROJECT_ROOT+x} ] || [ -z ${CI_BUILD_ROOT+x} ]; then
+    SCRIPT_PATH="$(dirname $0)"
+    CI_PROJECT_ROOT=$(realpath "$SCRIPT_PATH/..")
+    CI_BUILD_ROOT=$(pwd)
 fi
-
-CI_BUILD_ROOT=$(pwd)
 
 ci_debug

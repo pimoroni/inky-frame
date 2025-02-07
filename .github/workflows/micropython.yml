@@ -22,6 +22,7 @@ jobs:
       RELEASE_FILE: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
       CI_PROJECT_ROOT: ${{ github.workspace }}/src-${{ github.sha }}
       CI_BUILD_ROOT: ${{ github.workspace }}
+      CI_USE_ENV: 1
 
     steps:
     - name: Compiler Cache Fixup
