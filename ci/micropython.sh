@@ -96,6 +96,7 @@ function ci_cmake_configure {
     -DPICOTOOL_FORCE_FETCH_FROM_GIT=1 \
     -DPICO_BUILD_DOCS=0 \
     -DPICO_NO_COPRO_DIS=1 \
+    -DPICOTOOL_FETCH_FROM_GIT_PATH="$TOOLS_DIR/picotool" \
     -DPIMORONI_PICO_PATH="$CI_BUILD_ROOT/pimoroni-pico" \
     -DPIMORONI_TOOLS_DIR="$TOOLS_DIR" \
     -DUSER_C_MODULES="$MICROPY_BOARD_DIR/usermodules.cmake" \
