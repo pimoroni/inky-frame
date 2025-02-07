@@ -7,7 +7,7 @@
 // Enable networking.
 #define MICROPY_PY_NETWORK_PPP_LWIP             (1)
 #define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT     "Inky2W"
-#include "enable_cyw43.h"
+#include "../enable_cyw43.h"
 
 // For debugging mbedtls - also set
 // Debug level (0-4) 1=warning, 2=info, 3=debug, 4=verbose
