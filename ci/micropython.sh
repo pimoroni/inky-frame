@@ -97,7 +97,7 @@ function ci_cmake_configure {
     TOOLS_DIR="$CI_BUILD_ROOT/tools"
     MICROPY_BOARD_DIR=$CI_PROJECT_ROOT/boards/$BOARD
     if [ ! -f "$MICROPY_BOARD_DIR/usermodules.cmake" ]; then
-        log_warning "Invalid board: $MICROPY_BOARD_DIR"
+        log_warning "Invalid board: \"$BOARD\". Run with ci_cmake_configure <board_name>."
         return 1
     fi
     BUILD_DIR="$CI_BUILD_ROOT/build-$BOARD"
@@ -117,6 +117,10 @@ function ci_cmake_configure {
 function ci_cmake_build {
     BOARD=$1
     MICROPY_BOARD_DIR=$CI_PROJECT_ROOT/boards/$BOARD
+    if [ ! -f "$MICROPY_BOARD_DIR/usermodules.cmake" ]; then
+        log_warning "Invalid board: \"$BOARD\". Run with ci_cmake_build <board_name>."
+        return 1
+    fi
     BUILD_DIR="$CI_BUILD_ROOT/build-$BOARD"
     ccache --zero-stats || true
     cmake --build $BUILD_DIR -j 2
