@@ -59,6 +59,7 @@ function ci_tools_clone {
     mkdir -p "$CI_BUILD_ROOT/tools"
     git clone https://github.com/gadgetoid/py_decl -b "$PY_DECL_VERSION" "$CI_BUILD_ROOT/tools/py_decl"
     git clone https://github.com/gadgetoid/dir2uf2 -b "$DIR2UF2_VERSION" "$CI_BUILD_ROOT/tools/dir2uf2"
+    python3 -m pip install littlefs-python==0.12.0
 }
 
 function ci_micropython_build_mpy_cross {
@@ -70,7 +71,7 @@ function ci_micropython_build_mpy_cross {
 }
 
 function ci_apt_install_build_deps {
-    sudo apt update && sudo apt install ccache python3-virtualenvwrapper virtualenvwrapper
+    sudo apt update && sudo apt install ccache
 }
 
 function ci_prepare_all {
@@ -93,6 +94,7 @@ function micropython_version {
 
 function ci_cmake_configure {
     BOARD=$1
+    TOOLS_DIR="$CI_BUILD_ROOT/tools"
     MICROPY_BOARD_DIR=$CI_PROJECT_ROOT/boards/$BOARD
     if [ ! -f "$MICROPY_BOARD_DIR/usermodules.cmake" ]; then
         log_warning "Invalid board: $MICROPY_BOARD_DIR"
@@ -104,6 +106,7 @@ function ci_cmake_configure {
     -DPICO_BUILD_DOCS=0 \
     -DPICO_NO_COPRO_DIS=1 \
     -DPIMORONI_PICO_PATH="$CI_BUILD_ROOT/pimoroni-pico" \
+    -DPIMORONI_TOOLS_DIR="$TOOLS_DIR" \
     -DUSER_C_MODULES="$MICROPY_BOARD_DIR/usermodules.cmake" \
     -DMICROPY_BOARD_DIR="$MICROPY_BOARD_DIR" \
     -DMICROPY_BOARD="$BOARD" \
@@ -114,22 +117,16 @@ function ci_cmake_configure {
 function ci_cmake_build {
     BOARD=$1
     MICROPY_BOARD_DIR=$CI_PROJECT_ROOT/boards/$BOARD
-    EXAMPLES_DIR=$CI_PROJECT_ROOT/examples/inkylauncher/
-    TOOLS_DIR=$CI_BUILD_ROOT/tools
     BUILD_DIR="$CI_BUILD_ROOT/build-$BOARD"
     ccache --zero-stats || true
     cmake --build $BUILD_DIR -j 2
     ccache --show-stats || true
-    if [ -d "$TOOLS_DIR/py_decl" ]; then
-        log_inform "Tools found, verifying .uf2 with py_decl..."
-        python3 "$TOOLS_DIR/py_decl/py_decl.py" --to-json --verify "$BUILD_DIR/firmware.uf2"
-    fi
+
     log_inform "Copying .uf2 to $(pwd)/$BOARD.uf2"
     cp "$BUILD_DIR/firmware.uf2" $BOARD.uf2
 
-    if [ -f "$MICROPY_BOARD_DIR/manifest.txt" ] && [ -d "$TOOLS_DIR/dir2uf2" ]; then
-        log_inform "Creating $(pwd)/$BOARD-with-filesystem.uf2"
-        python3 -m pip install littlefs-python==0.12.0
-        $TOOLS_DIR/dir2uf2/dir2uf2 --fs-compact --sparse --append-to "$(pwd)/$BOARD.uf2" --manifest "$MICROPY_BOARD_DIR/manifest.txt" --filename with-filesystem.uf2 "$EXAMPLES_DIR"
+    if [ -f "$BUILD_DIR/firmware-with-filesystem.uf2" ]; then
+        log_inform "Copying -with-filesystem .uf2 to $(pwd)/$BOARD-with-filesystem.uf2"
+        cp "$BUILD_DIR/firmware-with-filesystem.uf2" $BOARD-with-filesystem.uf2
     fi
 }
