@@ -24,3 +24,5 @@ with open("/sd/inkytest.txt", "r") as f:
     data = f.read()
     print(data)
     f.close()
+
+os.umount("/sd")
