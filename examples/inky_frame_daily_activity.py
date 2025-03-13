@@ -4,6 +4,7 @@ from network_manager import NetworkManager
 import uasyncio
 import ujson
 from urllib import urequest
+
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
@@ -30,7 +31,7 @@ rtc = PCF85063A(i2c)
 UPDATE_INTERVAL = 60 * 1
 
 # API URL
-URL = "https://www.boredapi.com/api/activity"
+URL = "https://bored.api.lewagon.com/api/activity"
 
 
 def status_handler(mode, status, ip):
@@ -97,7 +98,9 @@ rtc.enable_timer_interrupt(True)
 
 while True:
     # Connect to WiFi
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    uasyncio.get_event_loop().run_until_complete(
+        network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK)
+    )
 
     # Clear the screen
     graphics.set_pen(1)
@@ -109,7 +112,7 @@ while True:
     j = ujson.load(socket)
     socket.close()
 
-    text = [j['activity'], j['type'], j['participants']]
+    text = [j["activity"], j["type"], j["participants"]]
 
     # Page lines!
     graphics.set_pen(3)
