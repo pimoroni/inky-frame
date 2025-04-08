@@ -9,7 +9,7 @@ require("sdcard")
 # Bluetooth
 require("aioble")
 
-freeze("../../pimoroni-pico/micropython/modules_py", "pimoroni.py")
-freeze("../../pimoroni-pico/micropython/modules_py", "boot.py")
-freeze("../../pimoroni-pico/micropython/modules_py", "lte.py")
+freeze("$(MPY_DIR)/../pimoroni-pico/micropython/modules_py", "pimoroni.py")
+freeze("$(MPY_DIR)/../pimoroni-pico/micropython/modules_py", "boot.py")
+freeze("$(MPY_DIR)/../pimoroni-pico/micropython/modules_py", "lte.py")
 freeze("../modules", "inky_frame.py")
