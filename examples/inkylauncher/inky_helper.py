@@ -100,7 +100,7 @@ def network_connect(SSID, PSK):
         if wlan.status() < 0 or wlan.status() >= 3:
             break
         max_wait -= 1
-        print('waiting for connection...')
+        print("waiting for connection...")
         time.sleep(1)
 
     stop_network_led()
@@ -143,7 +143,7 @@ def load_state():
 
 def update_state(running):
     global state
-    state['run'] = running
+    state["run"] = running
     save_state(state)
 
 

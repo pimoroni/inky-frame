@@ -50,7 +50,7 @@ def display_image(filename):
 
 
 # setup
-print('Press a button to display an image!')
+print("Press a button to display an image!")
 
 while True:
     inky_frame.button_a.led_off()
@@ -60,23 +60,23 @@ while True:
     inky_frame.button_e.led_off()
 
     if inky_frame.button_a.read():
-        print('Refreshing image A.')
+        print("Refreshing image A.")
         inky_frame.button_a.led_on()
         display_image(IMAGE_A)
     elif inky_frame.button_b.read():
-        print('Refreshing image B.')
+        print("Refreshing image B.")
         inky_frame.button_b.led_on()
         display_image(IMAGE_B)
     elif inky_frame.button_c.read():
-        print('Refreshing image C.')
+        print("Refreshing image C.")
         inky_frame.button_c.led_on()
         display_image(IMAGE_C)
     elif inky_frame.button_d.read():
-        print('Refreshing image D.')
+        print("Refreshing image D.")
         inky_frame.button_d.led_on()
         display_image(IMAGE_D)
     elif inky_frame.button_e.read():
-        print('Refreshing image E.')
+        print("Refreshing image E.")
         inky_frame.button_e.led_on()
         display_image(IMAGE_E)
 

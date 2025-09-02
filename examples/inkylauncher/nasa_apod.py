@@ -48,7 +48,7 @@ def update():
         gc.collect()
         j = load(socket)
         socket.close()
-        apod_title = j['title']
+        apod_title = j["title"]
         gc.collect()
     except OSError as e:
         print(e)

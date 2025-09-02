@@ -146,7 +146,7 @@ while True:
     j = ujson.load(socket)
     socket.close()
 
-    text = j['expandtemplates']['wikitext']
+    text = j["expandtemplates"]["wikitext"]
     del j
     gc.collect()
 

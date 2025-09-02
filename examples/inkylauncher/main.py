@@ -134,7 +134,7 @@ ih.clear_button_leds()
 if ih.file_exists("state.json"):
     # Loads the JSON and launches the app
     ih.load_state()
-    ih.launch_app(ih.state['run'])
+    ih.launch_app(ih.state["run"])
 
     # Passes the the graphics object from the launcher to the app
     ih.app.graphics = graphics
