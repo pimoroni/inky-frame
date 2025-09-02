@@ -1,0 +1,28 @@
+name: Python Linting
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Python Linting
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Python
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+      with:
+        python-version: '3.13'
+
+    - name: Install Python Deps
+      run: source ci/python.sh && qa_prepare_all
+
+    - name: Lint MicroPython Examples
+      shell: bash
+      run: source ci/python.sh && qa_examples_check
+
+    - name: Lint MicroPython Modules
+      shell: bash
+      run: source ci/python.sh && qa_modules_check
