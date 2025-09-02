@@ -21,17 +21,18 @@
 
 QA_INCLUDE="F,Q,W,E,B,COM,BLE,C4,ISC,ICN,PIE,RSE,RET,SLF,ARG"
 QA_IGNORE="E501,E402,COM812,ICN001"
+QA_FILES_EXCLUDE="*/tinyweb/*"
 
 function qa_prepare_all {
     pip install ruff
 }
 
 function qa_check {
-    ruff check --select "$QA_INCLUDE" --ignore "$QA_IGNORE" "$1"
+    ruff check --exclude "$QA_FILES_EXCLUDE" --select "$QA_INCLUDE" --ignore "$QA_IGNORE" "$1"
 }
 
 function qa_fix {
-    ruff check --select "$QA_INCLUDE" --ignore "$QA_IGNORE" --fix "$1"
+    ruff check --exclude "$QA_FILES_EXCLUDE" --select "$QA_INCLUDE" --ignore "$QA_IGNORE" --fix "$1"
 }
 
 function qa_examples_check {
