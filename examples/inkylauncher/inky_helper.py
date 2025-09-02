@@ -38,7 +38,7 @@ network_led_timer = Timer(-1)
 network_led_pulse_speed_hz = 1
 
 
-def network_led_callback(t):
+def network_led_callback(_t):
     # updates the network led brightness based on a sinusoid seeded by the current time
     brightness = (math.sin(time.ticks_ms() * math.pi * 2 / (1000 / network_led_pulse_speed_hz)) * 40) + 60
     value = int(pow(brightness / 100.0, 2.8) * 65535.0 + 0.5)

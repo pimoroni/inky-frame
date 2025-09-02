@@ -34,6 +34,8 @@ class Button:
             self._changed = time.ticks_ms()
             return value
 
+        return None
+
 
 button_a = Button(7, 11)
 button_b = Button(6, 12)
