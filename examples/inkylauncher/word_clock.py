@@ -1,5 +1,6 @@
 import machine
 import ntptime
+from inky_frame import RED, WHITE
 
 # Length of time between updates in minutes.
 UPDATE_INTERVAL = 15
@@ -54,9 +55,8 @@ def draw():
     WIDTH, HEIGHT = graphics.get_bounds()
 
     # Clear the screen
-    graphics.set_pen(1)
+    graphics.set_pen(WHITE)
     graphics.clear()
-    graphics.set_pen(6)
 
     # Values for the layout and spacing
     if WIDTH == 640:  # Inky Frame 4.0"
@@ -84,7 +84,7 @@ def draw():
     for word in words:
 
         if word in time_string:
-            graphics.set_pen(0)
+            graphics.set_pen(RED)
         else:
             graphics.set_pen(graphics.create_pen(220, 220, 220))
 

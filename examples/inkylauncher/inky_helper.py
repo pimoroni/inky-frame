@@ -1,12 +1,13 @@
-from pimoroni_i2c import PimoroniI2C
-from pcf85063a import PCF85063A
-import math
-from machine import Pin, PWM, Timer
-import time
-import inky_frame
 import json
-import network
+import math
 import os
+import time
+
+import inky_frame
+import network
+from machine import PWM, Pin, Timer
+from pcf85063a import PCF85063A
+from pimoroni_i2c import PimoroniI2C
 
 # Pin setup for VSYS_HOLD needed to sleep and wake.
 HOLD_VSYS_EN_PIN = 2

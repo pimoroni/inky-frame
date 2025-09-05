@@ -1,12 +1,16 @@
 import gc
 import time
-from machine import reset
-import inky_helper as ih
 
+import inky_helper as ih
+from inky_frame import BLACK, BLUE, GREEN, WHITE
+from machine import reset
 # Uncomment the line for your Inky Frame display size
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
 
 # Create a secrets.py with your Wifi details to be able to get the time
 #
@@ -36,38 +40,37 @@ def launcher():
         y_offset = 0
 
     # Draws the menu
-    graphics.set_pen(1)
+    graphics.set_pen(WHITE)
     graphics.clear()
-    graphics.set_pen(0)
 
-    graphics.set_pen(graphics.create_pen(255, 215, 0))
+    graphics.set_pen(BLUE)
     graphics.rectangle(0, 0, WIDTH, 50)
-    graphics.set_pen(0)
+    graphics.set_pen(WHITE)
     title = "Launcher"
     title_len = graphics.measure_text(title, 4) // 2
     graphics.text(title, (WIDTH // 2 - title_len), 10, WIDTH, 4)
 
-    graphics.set_pen(4)
+    graphics.set_pen(GREEN)
     graphics.rectangle(30, HEIGHT - (340 + y_offset), WIDTH - 100, 50)
     graphics.set_pen(1)
     graphics.text("A. NASA Picture of the Day", 35, HEIGHT - (325 + y_offset), 600, 3)
 
-    graphics.set_pen(6)
+    graphics.set_pen(BLUE)
     graphics.rectangle(30, HEIGHT - (280 + y_offset), WIDTH - 150, 50)
     graphics.set_pen(1)
     graphics.text("B. Word Clock", 35, HEIGHT - (265 + y_offset), 600, 3)
 
-    graphics.set_pen(2)
+    graphics.set_pen(GREEN)
     graphics.rectangle(30, HEIGHT - (220 + y_offset), WIDTH - 200, 50)
     graphics.set_pen(1)
     graphics.text("C. Daily XKCD", 35, HEIGHT - (205 + y_offset), 600, 3)
 
-    graphics.set_pen(3)
+    graphics.set_pen(BLUE)
     graphics.rectangle(30, HEIGHT - (160 + y_offset), WIDTH - 250, 50)
     graphics.set_pen(1)
     graphics.text("D. Headlines", 35, HEIGHT - (145 + y_offset), 600, 3)
 
-    graphics.set_pen(0)
+    graphics.set_pen(GREEN)
     graphics.rectangle(30, HEIGHT - (100 + y_offset), WIDTH - 300, 50)
     graphics.set_pen(1)
     graphics.text("E. Carbon Intensity", 35, HEIGHT - (85 + y_offset), 600, 3)
@@ -79,7 +82,7 @@ def launcher():
     graphics.rectangle(WIDTH - 250, HEIGHT - (160 + y_offset), 220, 50)
     graphics.rectangle(WIDTH - 300, HEIGHT - (100 + y_offset), 270, 50)
 
-    graphics.set_pen(0)
+    graphics.set_pen(BLACK)
     note = "Hold A + E, then press Reset, to return to the Launcher"
     note_len = graphics.measure_text(note, 2) // 2
     graphics.text(note, (WIDTH // 2 - note_len), HEIGHT - 30, 600, 2)
@@ -145,7 +148,7 @@ else:
     launcher()
 
 try:
-    from secrets import WIFI_SSID, WIFI_PASSWORD
+    from secrets import WIFI_PASSWORD, WIFI_SSID
     ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
 except ImportError:
     print("Create secrets.py with your WiFi credentials")

@@ -1,9 +1,11 @@
 import gc
-import uos
-import machine
-import jpegdec
-import sdcard
 from urllib import urequest
+
+import jpegdec
+import machine
+import sdcard
+import uos
+from inky_frame import WHITE
 
 """
 xkcd daily
@@ -60,7 +62,7 @@ def draw():
 
     jpeg = jpegdec.JPEG(graphics)
 
-    graphics.set_pen(1)
+    graphics.set_pen(WHITE)
     graphics.clear()
 
     jpeg.open_file(FILENAME)
