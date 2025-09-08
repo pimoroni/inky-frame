@@ -1,6 +1,8 @@
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from inky_frame import BLACK, WHITE
 import pngdec
 
 # Create a PicoGraphics instance
@@ -14,9 +16,9 @@ graphics.set_font("bitmap8")
 png = pngdec.PNG(graphics)
 
 # Clear the screen
-graphics.set_pen(1)
+graphics.set_pen(WHITE)
 graphics.clear()
-graphics.set_pen(0)
+graphics.set_pen(BLACK)
 
 # Few lines of text.
 graphics.text("PNG Pencil", 70, 100, WIDTH, 3)

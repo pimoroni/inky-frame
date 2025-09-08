@@ -41,7 +41,7 @@ reset_shift_state()
 
 i2c = I2C(0)
 rtc = pcf85063a.PCF85063A(i2c)
-i2c.writeto_mem(0x51, 0x00, b'\x00')  # ensure rtc is running (this should be default?)
+i2c.writeto_mem(0x51, 0x00, b"\x00")  # ensure rtc is running (this should be default?)
 rtc.enable_timer_interrupt(False)
 
 vsys = Pin(HOLD_VSYS_EN)

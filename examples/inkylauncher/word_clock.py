@@ -1,5 +1,6 @@
 import machine
 import ntptime
+from inky_frame import RED, WHITE
 
 # Length of time between updates in minutes.
 UPDATE_INTERVAL = 15
@@ -21,14 +22,13 @@ def approx_time(hours, minutes):
         hours = 0
     if minutes > 0 and minutes < 8:
         return "it is about " + nums[hours] + " O'Clock"
-    elif minutes >= 8 and minutes < 23:
+    if minutes >= 8 and minutes < 23:
         return "it is about quarter past " + nums[hours]
-    elif minutes >= 23 and minutes < 38:
+    if minutes >= 23 and minutes < 38:
         return "it is about half past " + nums[hours]
-    elif minutes >= 38 and minutes < 53:
+    if minutes >= 38 and minutes < 53:
         return "it is about quarter to " + nums[hours + 1]
-    else:
-        return "it is about " + nums[hours + 1] + " O'Clock"
+    return "it is about " + nums[hours + 1] + " O'Clock"
 
 
 def update():
@@ -55,9 +55,8 @@ def draw():
     WIDTH, HEIGHT = graphics.get_bounds()
 
     # Clear the screen
-    graphics.set_pen(1)
+    graphics.set_pen(WHITE)
     graphics.clear()
-    graphics.set_pen(6)
 
     # Values for the layout and spacing
     if WIDTH == 640:  # Inky Frame 4.0"
@@ -85,7 +84,7 @@ def draw():
     for word in words:
 
         if word in time_string:
-            graphics.set_pen(0)
+            graphics.set_pen(RED)
         else:
             graphics.set_pen(graphics.create_pen(220, 220, 220))
 

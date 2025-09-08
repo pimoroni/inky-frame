@@ -3,8 +3,10 @@
 from pimoroni import ShiftRegister
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
 from machine import Pin
+from inky_frame import BLACK, WHITE, BLUE, RED, YELLOW, GREEN
 
 display = PicoGraphics(display=DISPLAY)
 
@@ -28,13 +30,13 @@ button_e_led = Pin(15, Pin.OUT)
 # a handy function we can call to clear the screen
 # display.set_pen(1) is white and display.set_pen(0) is black
 def clear():
-    display.set_pen(1)
+    display.set_pen(WHITE)
     display.clear()
 
 
 # set up
 clear()
-display.set_pen(0)
+display.set_pen(BLACK)
 display.text("Press any button!", 10, 10, scale=4)
 display.update()
 
@@ -57,30 +59,30 @@ while True:
     if button_a == 1:                                      # if a button press is detected then...
         button_a_led.on()
         clear()                                            # clear to white
-        display.set_pen(4)                                 # change the pen colour
+        display.set_pen(RED)                               # change the pen colour
         display.text("Button A pressed", 10, 10, scale=4)  # display some text on the screen
         display.update()                                   # update the display
     elif button_b == 1:
         button_b_led.on()
         clear()
-        display.set_pen(6)
+        display.set_pen(GREEN)
         display.text("Button B pressed", 10, 50, scale=4)
         display.update()
     elif button_c == 1:
         button_c_led.on()
         clear()
-        display.set_pen(5)
+        display.set_pen(BLUE)
         display.text("Button C pressed", 10, 90, scale=4)
         display.update()
     elif button_d == 1:
         button_d_led.on()
         clear()
-        display.set_pen(2)
+        display.set_pen(YELLOW)
         display.text("Button D pressed", 10, 130, scale=4)
         display.update()
     elif button_e == 1:
         button_e_led.on()
         clear()
-        display.set_pen(3)
+        display.set_pen(BLACK)
         display.text("Button E pressed", 10, 170, scale=4)
         display.update()

@@ -12,7 +12,7 @@ Make sure to uncomment the correct size for your display!
 """
 
 import urequests
-import inky_frame
+from inky_frame import BLACK, BLUE, GREEN, ORANGE, RED, WHITE
 
 graphics = None
 WIDTH = None
@@ -45,7 +45,7 @@ def update():
 
     power_list = []
     for power in j["data"][0]["data"][0]["generationmix"]:
-        power_list.append(power['perc'])
+        power_list.append(power["perc"])
 
     datetime_to = j["data"][0]["data"][0]["to"].split("T")
     datetime_from = j["data"][0]["data"][0]["from"].split("T")
@@ -57,28 +57,28 @@ def update():
 def draw():
     # we're setting up our PicoGraphics buffer after we've made our RAM intensive https request
     w, h = WIDTH, HEIGHT
-    graphics.set_pen(inky_frame.WHITE)
+    graphics.set_pen(WHITE)
     graphics.clear()
 
     # draw lines
-    graphics.set_pen(inky_frame.BLACK)
+    graphics.set_pen(BLACK)
     graphics.line(0, int((h / 100) * 0), w, int((h / 100) * 0))
     graphics.line(0, int((h / 100) * 50), w, int((h / 100) * 50))
     graphics.set_font("bitmap8")
-    graphics.text('100%', w - 40, 10, scale=2)
-    graphics.text('50%', w - 40, int((h / 100) * 50 + 10), scale=2)
+    graphics.text("100%", w - 40, 10, scale=2)
+    graphics.text("50%", w - 40, int((h / 100) * 50 + 10), scale=2)
 
     # draw bars
     bar_colours = [
-        inky_frame.ORANGE,
-        inky_frame.RED,
-        inky_frame.ORANGE,
-        inky_frame.RED,
-        inky_frame.BLUE,
-        inky_frame.ORANGE,
-        inky_frame.GREEN,
-        inky_frame.GREEN,
-        inky_frame.GREEN
+        ORANGE,
+        RED,
+        ORANGE,
+        RED,
+        BLUE,
+        ORANGE,
+        GREEN,
+        GREEN,
+        GREEN
     ]
     for p in power_list:
         graphics.set_pen(bar_colours[power_list.index(p)])
@@ -86,35 +86,35 @@ def draw():
                            int(w / 9), int(h / 100 * p))
 
     # draw labels
-    graphics.set_font('sans')
+    graphics.set_font("sans")
     # once in white for a background
-    graphics.set_pen(inky_frame.WHITE)
-    labels = ['biomass', 'coal', 'imports', 'gas', 'nuclear', 'other', 'hydro', 'solar', 'wind']
+    graphics.set_pen(WHITE)
+    labels = ["biomass", "coal", "imports", "gas", "nuclear", "other", "hydro", "solar", "wind"]
     graphics.set_thickness(4)
     for label in labels:
-        graphics.text(f'{label}', int((labels.index(label) * w / 9) + (w / 9) / 2), h - 10, angle=270, scale=1)
+        graphics.text(f"{label}", int((labels.index(label) * w / 9) + (w / 9) / 2), h - 10, angle=270, scale=1)
     # again in black
-    graphics.set_pen(inky_frame.BLACK)
-    labels = ['biomass', 'coal', 'imports', 'gas', 'nuclear', 'other', 'hydro', 'solar', 'wind']
+    graphics.set_pen(BLACK)
+    labels = ["biomass", "coal", "imports", "gas", "nuclear", "other", "hydro", "solar", "wind"]
     graphics.set_thickness(2)
     for label in labels:
-        graphics.text(f'{label}', int((labels.index(label) * w / 9) + (w / 9) / 2), h - 10, angle=270, scale=1)
+        graphics.text(f"{label}", int((labels.index(label) * w / 9) + (w / 9) / 2), h - 10, angle=270, scale=1)
 
     # draw header
     graphics.set_thickness(3)
-    graphics.set_pen(inky_frame.GREEN)
-    if index in ['high', 'very high']:
-        graphics.set_pen(inky_frame.RED)
-    if index in ['moderate']:
-        graphics.set_pen(inky_frame.ORANGE)
+    graphics.set_pen(GREEN)
+    if index in ["high", "very high"]:
+        graphics.set_pen(RED)
+    if index in ["moderate"]:
+        graphics.set_pen(ORANGE)
     graphics.set_font("sans")
-    graphics.text('Carbon Intensity', 10, 35, scale=1.2, angle=0)
+    graphics.text("Carbon Intensity", 10, 35, scale=1.2, angle=0)
 
     # draw small text
-    graphics.set_pen(inky_frame.BLACK)
+    graphics.set_pen(BLACK)
     graphics.set_font("bitmap8")
-    graphics.text(f'Region: {region}', int((w / 2) + 30), 10, scale=2)
-    graphics.text(f'{forecast} gCO2/kWh ({index})', int((w / 2) + 30), 30, scale=2)
-    graphics.text(f'{datetime_from[0]} {datetime_from[1]} to {datetime_to[1]}', int((w / 2) + 30), 50, scale=2)
+    graphics.text(f"Region: {region}", int((w / 2) + 30), 10, scale=2)
+    graphics.text(f"{forecast} gCO2/kWh ({index})", int((w / 2) + 30), 30, scale=2)
+    graphics.text(f"{datetime_from[0]} {datetime_from[1]} to {datetime_to[1]}", int((w / 2) + 30), 50, scale=2)
 
     graphics.update()

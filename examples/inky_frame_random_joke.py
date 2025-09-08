@@ -52,7 +52,7 @@ print("Total jokes {}".format(number_of_lines))
 line = random.randint(0, number_of_lines)
 print("Getting ID from line {}".format(line))
 
-for x in range(line):  # Throw away lines to get where we need
+for _x in range(line):  # Throw away lines to get where we need
     socket.readline()
 
 # Read our chosen joke ID!

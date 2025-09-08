@@ -1,6 +1,8 @@
 import gc
-import jpegdec
 from urllib import urequest
+
+import jpegdec
+from inky_frame import BLACK, RED, WHITE
 from ujson import load
 
 gc.collect()
@@ -23,9 +25,9 @@ apod_title = None
 
 
 def show_error(text):
-    graphics.set_pen(4)
+    graphics.set_pen(RED)
     graphics.rectangle(0, 10, WIDTH, 35)
-    graphics.set_pen(1)
+    graphics.set_pen(BLACK)
     graphics.text(text, 5, 16, 400, 2)
 
 
@@ -48,7 +50,7 @@ def update():
         gc.collect()
         j = load(socket)
         socket.close()
-        apod_title = j['title']
+        apod_title = j["title"]
         gc.collect()
     except OSError as e:
         print(e)
@@ -78,22 +80,22 @@ def draw():
     jpeg = jpegdec.JPEG(graphics)
     gc.collect()  # For good measure...
 
-    graphics.set_pen(1)
+    graphics.set_pen(WHITE)
     graphics.clear()
 
     try:
         jpeg.open_file(FILENAME)
         jpeg.decode()
     except OSError:
-        graphics.set_pen(4)
+        graphics.set_pen(RED)
         graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
-        graphics.set_pen(1)
+        graphics.set_pen(BLACK)
         graphics.text("Unable to display image!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
         graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
 
-    graphics.set_pen(0)
+    graphics.set_pen(WHITE)
     graphics.rectangle(0, HEIGHT - 25, WIDTH, 25)
-    graphics.set_pen(1)
+    graphics.set_pen(BLACK)
     graphics.text(apod_title, 5, HEIGHT - 20, WIDTH, 2)
 
     gc.collect()

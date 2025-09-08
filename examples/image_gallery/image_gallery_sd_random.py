@@ -52,7 +52,7 @@ inky_frame.led_busy.on()
 # Get a list of files that are in the directory
 files = os.listdir("/sd")
 # remove files from the list that aren't .jpgs or .jpegs
-files = [f for f in files if f.endswith(".jpg") or f.endswith(".jpeg")]
+files = [f for f in files if f.endswith((".jpg", ".jpeg"))]
 
 while True:
     # pick a random file

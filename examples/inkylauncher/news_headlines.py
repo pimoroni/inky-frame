@@ -1,6 +1,8 @@
-from urllib import urequest
 import gc
+from urllib import urequest
+
 import qrcode
+from inky_frame import BLACK, BLUE, RED, WHITE
 
 # Uncomment one URL to use (Top Stories, World News and technology)
 # URL = "https://feeds.bbci.co.uk/news/rss.xml"
@@ -23,6 +25,8 @@ def read_until(stream, find):
         if c == find:
             return result
         result += c
+
+    return None
 
 
 def discard_until(stream, find):
@@ -107,8 +111,7 @@ def draw_qr_code(ox, oy, size, code):
 def get_rss():
     try:
         stream = urequest.urlopen(URL)
-        output = list(parse_xml_stream(stream, [b"title", b"description", b"guid", b"pubDate"], b"item"))
-        return output
+        return list(parse_xml_stream(stream, [b"title", b"description", b"guid", b"pubDate"], b"item"))
 
     except OSError as e:
         print(e)
@@ -129,9 +132,9 @@ def draw():
     graphics.set_font("bitmap8")
 
     # Clear the screen
-    graphics.set_pen(1)
+    graphics.set_pen(WHITE)
     graphics.clear()
-    graphics.set_pen(0)
+    graphics.set_pen(BLACK)
 
     # Draws 2 articles from the feed if they're available.
     if len(feed) > 0:
@@ -139,15 +142,15 @@ def draw():
         # Title
         graphics.set_pen(graphics.create_pen(200, 0, 0))
         graphics.rectangle(0, 0, WIDTH, 40)
-        graphics.set_pen(1)
-        graphics.text("Headlines from BBC News:", 10, 10, 320, 3)
+        graphics.set_pen(BLACK)
+        graphics.text("Headlines from BBC News:", 10, 10, WIDTH, 3)
 
-        graphics.set_pen(4)
+        graphics.set_pen(RED)
         graphics.text(feed[0]["title"], 10, 70, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < WIDTH else 2)
         graphics.text(feed[1]["title"], 130, 260, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < WIDTH else 2)
 
-        graphics.set_pen(3)
-        graphics.text(feed[0]["description"], 10, 135 if graphics.measure_text(feed[0]["title"]) < 650 else 90, WIDTH - 150, 2)
+        graphics.set_pen(BLUE)
+        graphics.text(feed[0]["description"], 10, 155 if graphics.measure_text(feed[0]["title"]) < 650 else 130, WIDTH - 150, 2)
         graphics.text(feed[1]["description"], 130, 320 if graphics.measure_text(feed[1]["title"]) < 650 else 340, WIDTH - 145, 2)
 
         graphics.line(10, 215, WIDTH - 10, 215)
@@ -161,9 +164,9 @@ def draw():
         graphics.rectangle(0, HEIGHT - 20, WIDTH, 20)
 
     else:
-        graphics.set_pen(4)
+        graphics.set_pen(RED)
         graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
-        graphics.set_pen(1)
+        graphics.set_pen(BLACK)
         graphics.text("Unable to display news feed!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
         graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
 
