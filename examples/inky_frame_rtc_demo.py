@@ -1,11 +1,11 @@
 import time
-import uasyncio
-import WIFI_CONFIG
 import inky_frame
-from network_manager import NetworkManager
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
+import inky_helper as ih
 
 # Set tz_offset to be the number of hours off of UTC for your local zone.
 # Examples:  tz_offset = -7 # Pacific time (PST)
@@ -39,31 +39,17 @@ if inky_frame.woken_by_rtc() or inky_frame.woken_by_button():
     graphics.text("Inky Frame", 1, 0)
     graphics.set_pen(0)
 
-    def status_handler(mode, status, ip):
-        print(mode, status, ip)
-
     year, month, day, hour, minute, second, dow, _ = time.localtime(time.time() + tz_seconds)
 
     # Connect to the network and get the time if it's not set
     if year < 2023:
-        connected = False
-        network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler, client_timeout=60)
-
-        t_start = time.time()
+        # Connect to WiFi and set the time
         try:
-            uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-            connected = True
-        except RuntimeError:
-            pass
-        t_end = time.time()
-
-        if connected:
+            from secrets import WIFI_PASSWORD, WIFI_SSID
+            ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
             inky_frame.set_time()
-
-            graphics.text("Setting time from network...", 0, 40)
-            graphics.text(f"Connection took: {t_end-t_start}s", 0, 60)
-        else:
-            graphics.text("Failed to connect!", 0, 40)
+        except ImportError:
+            print("Add your WiFi credentials to secrets.py")
 
     # Display the date and time
     year, month, day, hour, minute, second, dow, _ = time.localtime(time.time() + tz_seconds)

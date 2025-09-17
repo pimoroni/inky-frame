@@ -7,18 +7,19 @@ Carbon Intensity API only reports data from the UK National Grid.
 Find out more about what the numbers mean at:
 https://carbonintensity.org.uk/
 
-Make sure to uncomment the correct size for your display!
+Make sure to uncomment the correct size for your display! You'll also need to add your wifi credentials to secrets.py
 
 """
 
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
-import urequests
 import inky_frame
-import uasyncio
-from network_manager import NetworkManager
-import WIFI_CONFIG
+import inky_helper as ih
+import urequests
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
 
 # Set (the first half) of your UK postcode here
 POSTCODE = "S9"
@@ -120,18 +121,14 @@ def draw():
     graphics.update()
 
 
-def status_handler(mode, status, ip):
-    print(mode, status, ip)
-
-
 inky_frame.led_busy.on()
-network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
 # connect to wifi
 try:
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    from secrets import WIFI_PASSWORD, WIFI_SSID
+    ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
 except ImportError:
-    print("Add WIFI_CONFIG.py with your WiFi credentials")
+    print("Add your WiFi credentials to secrets.py")
 
 get_data()
 draw()

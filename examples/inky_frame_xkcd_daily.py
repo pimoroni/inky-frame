@@ -1,15 +1,17 @@
 import gc
-import uos
-import machine
-import jpegdec
-import uasyncio
-import sdcard
-import WIFI_CONFIG
 from urllib import urequest
-from network_manager import NetworkManager
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+
+import inky_helper as ih
+import jpegdec
+import machine
+import sdcard
+import uos
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
 
 """
 xkcd daily
@@ -25,14 +27,12 @@ See https://xkcd.com/ for more webcomics!
 
 gc.collect()  # We're really gonna need that RAM!
 
-
-def status_handler(mode, status, ip):
-    print(mode, status, ip)
-
-
-network_manager = NetworkManager("GB", status_handler=status_handler)
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-
+# Connect to WiFi
+try:
+    from secrets import WIFI_PASSWORD, WIFI_SSID
+    ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
+except ImportError:
+    print("Add your WiFi credentials to secrets.py")
 
 graphics = PicoGraphics(DISPLAY)
 

@@ -1,18 +1,18 @@
 import gc
-import WIFI_CONFIG
-from network_manager import NetworkManager
-import uasyncio
-import ujson
+import time
 from urllib import urequest
 
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+import inky_helper as ih
+import ujson
 from machine import Pin
-from pimoroni_i2c import PimoroniI2C
 from pcf85063a import PCF85063A
-import time
-
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
+from pimoroni_i2c import PimoroniI2C
 
 I2C_SDA_PIN = 4
 I2C_SCL_PIN = 5
@@ -32,13 +32,6 @@ UPDATE_INTERVAL = 60 * 1
 
 # API URL
 URL = "https://bored.api.lewagon.com/api/activity"
-
-
-def status_handler(mode, status, ip):
-    print(mode, status, ip)
-
-
-network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
 gc.collect()
 graphics = PicoGraphics(DISPLAY)
@@ -98,9 +91,11 @@ rtc.enable_timer_interrupt(True)
 
 while True:
     # Connect to WiFi
-    uasyncio.get_event_loop().run_until_complete(
-        network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK)
-    )
+    try:
+        from secrets import WIFI_PASSWORD, WIFI_SSID
+        ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
+    except ImportError:
+        print("Add your WiFi credentials to secrets.py")
 
     # Clear the screen
     graphics.set_pen(1)
