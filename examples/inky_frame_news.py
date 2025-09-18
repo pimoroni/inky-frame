@@ -26,7 +26,8 @@ hold_vsys_en_pin.value(True)
 # Uncomment one URL to use (Top Stories, World News and technology)
 # URL = "https://feeds.bbci.co.uk/news/rss.xml"
 # URL = "https://feeds.bbci.co.uk/news/world/rss.xml"
-URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
+# URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
+URL = "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
 
 # Length of time between updates in Seconds.
 # Frequent updates will reduce battery life!
