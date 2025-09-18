@@ -1,27 +1,19 @@
 import gc
-import uos
 import random
-import machine
-import jpegdec
-import WIFI_CONFIG
-import uasyncio
-from network_manager import NetworkManager
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
 from urllib import urequest
 
+import inky_helper as ih
+import jpegdec
+import machine
+import uos
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
 
 gc.collect()  # We're really gonna need that RAM!
-
-
-def status_handler(mode, status, ip):
-    print(mode, status, ip)
-
-
-network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-
 
 graphics = PicoGraphics(DISPLAY)
 
@@ -32,10 +24,18 @@ JOKE_IDS = "https://pimoroni.github.io/feed2image/jokeapi-ids.txt"
 JOKE_IMG = "https://pimoroni.github.io/feed2image/jokeapi-{}-{}x{}.jpg"
 
 import sdcard  # noqa: E402 - putting this at the top causes an MBEDTLS OOM error!?
+
 sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))
 sd = sdcard.SDCard(sd_spi, machine.Pin(22))
 uos.mount(sd, "/sd")
 gc.collect()  # Claw back some RAM!
+
+# Connect to WiFi
+try:
+    from secrets import WIFI_PASSWORD, WIFI_SSID
+    ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
+except ImportError:
+    print("Add your WiFi credentials to secrets.py")
 
 # We don't have the RAM to store the list of Joke IDs in memory.
 # the first line of `jokeapi-ids.txt` is a COUNT of IDs.

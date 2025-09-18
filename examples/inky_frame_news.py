@@ -1,16 +1,19 @@
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
-from network_manager import NetworkManager
-import uasyncio
-from urllib import urequest
-import WIFI_CONFIG
 import gc
-import qrcode
-from machine import Pin
-from pimoroni_i2c import PimoroniI2C
-from pcf85063a import PCF85063A
 import time
+from urllib import urequest
+
+import inky_helper as ih
+import qrcode
+from inky_frame import BLACK, BLUE, RED
+from machine import Pin
+from pcf85063a import PCF85063A
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
+from pimoroni_i2c import PimoroniI2C
 
 I2C_SDA_PIN = 4
 I2C_SCL_PIN = 5
@@ -21,9 +24,10 @@ hold_vsys_en_pin = Pin(HOLD_VSYS_EN_PIN, Pin.OUT)
 hold_vsys_en_pin.value(True)
 
 # Uncomment one URL to use (Top Stories, World News and technology)
-# URL = "http://feeds.bbci.co.uk/news/rss.xml"
-# URL = "http://feeds.bbci.co.uk/news/world/rss.xml"
-URL = "http://feeds.bbci.co.uk/news/technology/rss.xml"
+# URL = "https://feeds.bbci.co.uk/news/rss.xml"
+# URL = "https://feeds.bbci.co.uk/news/world/rss.xml"
+# URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
+URL = "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml"
 
 # Length of time between updates in Seconds.
 # Frequent updates will reduce battery life!
@@ -39,25 +43,18 @@ i2c = PimoroniI2C(I2C_SDA_PIN, I2C_SCL_PIN, 100000)
 rtc = PCF85063A(i2c)
 
 
-def status_handler(mode, status, ip):
-    print(mode, status, ip)
-
-
-network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-
-
-def read_until(stream, char):
+def read_until(stream, find):
     result = b""
-    while True:
-        c = stream.read(1)
-        if c == char:
+    while len(c := stream.read(1)) > 0:
+        if c == find:
             return result
         result += c
 
+    return None
 
-def discard_until(stream, c):
-    while stream.read(1) != c:
-        pass
+
+def discard_until(stream, find):
+    _ = read_until(stream, find)
 
 
 def parse_xml_stream(s, accept_tags, group_by, max_items=3):
@@ -65,6 +62,7 @@ def parse_xml_stream(s, accept_tags, group_by, max_items=3):
     text = b""
     count = 0
     current = {}
+
     while True:
         char = s.read(1)
         if len(char) == 0:
@@ -108,9 +106,9 @@ def parse_xml_stream(s, accept_tags, group_by, max_items=3):
 
             else:
                 current_tag = read_until(s, b">")
-                tag += [next_char + current_tag.split(b" ")[0]]
-                text = b""
-                gc.collect()
+                if not current_tag.endswith(b"/"):
+                    tag += [next_char + current_tag.split(b" ")[0]]
+                    text = b""
 
         else:
             text += char
@@ -143,11 +141,17 @@ def get_rss():
         return False
 
 
+feed = None
+
 rtc.enable_timer_interrupt(True)
 
 while True:
     # Connect to WiFi
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    try:
+        from secrets import WIFI_PASSWORD, WIFI_SSID
+        ih.network_connect(WIFI_SSID, WIFI_PASSWORD)
+    except ImportError:
+        print("Add your WiFi credentials to secrets.py")
 
     # Gets Feed Data
     feed = get_rss()
@@ -158,30 +162,41 @@ while True:
     graphics.set_pen(0)
 
     # Title
-    graphics.text("Headlines from BBC News:", 10, 10, 300, 2)
+    graphics.text("Headlines from BBC News:", 10, 10, WIDTH, 3)
 
     # Draws 3 articles from the feed if they're available.
-    if feed:
-        graphics.set_pen(4)
-        graphics.text(feed[0]["title"], 10, 40, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < 650 else 2)
-        graphics.text(feed[1]["title"], 130, 180, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < 650 else 2)
-        graphics.text(feed[2]["title"], 10, 320, WIDTH - 150, 3 if graphics.measure_text(feed[2]["title"]) < 650 else 2)
+    if len(feed) > 0:
 
-        graphics.set_pen(3)
-        graphics.text(feed[0]["description"], 10, 110 if graphics.measure_text(feed[0]["title"]) < 650 else 90, WIDTH - 150, 2)
-        graphics.text(feed[1]["description"], 130, 250 if graphics.measure_text(feed[1]["title"]) < 650 else 230, WIDTH - 145, 2)
-        graphics.text(feed[2]["description"], 10, 395 if graphics.measure_text(feed[2]["title"]) < 650 else 375, WIDTH - 150, 2)
+        # Title
+        graphics.set_pen(graphics.create_pen(200, 0, 0))
+        graphics.rectangle(0, 0, WIDTH, 40)
+        graphics.set_pen(BLACK)
+        graphics.text("Headlines from BBC News:", 10, 10, WIDTH, 3)
+
+        graphics.set_pen(RED)
+        graphics.text(feed[0]["title"], 10, 70, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < WIDTH else 2)
+        graphics.text(feed[1]["title"], 130, 260, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < WIDTH else 2)
+
+        graphics.set_pen(BLUE)
+        graphics.text(feed[0]["description"], 10, 155 if graphics.measure_text(feed[0]["title"]) < 650 else 130, WIDTH - 150, 2)
+        graphics.text(feed[1]["description"], 130, 320 if graphics.measure_text(feed[1]["title"]) < 650 else 340, WIDTH - 145, 2)
+
+        graphics.line(10, 215, WIDTH - 10, 215)
 
         code.set_text(feed[0]["guid"])
-        draw_qr_code(WIDTH - 110, 40, 100, code)
+        draw_qr_code(WIDTH - 110, 65, 100, code)
         code.set_text(feed[1]["guid"])
-        draw_qr_code(10, 180, 100, code)
-        code.set_text(feed[2]["guid"])
-        draw_qr_code(WIDTH - 110, 320, 100, code)
+        draw_qr_code(10, 265, 100, code)
+
+        graphics.set_pen(graphics.create_pen(200, 0, 0))
+        graphics.rectangle(0, HEIGHT - 20, WIDTH, 20)
 
     else:
-        graphics.set_pen(4)
-        graphics.text("Error: Unable to get feed :(", 10, 40, WIDTH - 150, 4)
+        graphics.set_pen(RED)
+        graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
+        graphics.set_pen(BLACK)
+        graphics.text("Unable to display news feed!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
+        graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
 
     graphics.update()
 

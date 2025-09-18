@@ -10,15 +10,19 @@ If you want to use your own images they must be the screen dimensions
 Make sure to uncomment the correct size for your display!
 """
 
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
-# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
-from machine import Pin, SPI
+import os
+import random
+
+import inky_frame
 import jpegdec
 import sdcard
-import os
-import inky_frame
-import random
+from machine import SPI, Pin
+# from picographics import DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import DISPLAY_INKY_FRAME as DISPLAY    # 5.7"
+# from picographics import DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
+from picographics import \
+    DISPLAY_INKY_FRAME_SPECTRA_7 as DISPLAY  # 7.3" Spectra
+from picographics import PicoGraphics
 
 # how often to change image (in minutes)
 UPDATE_INTERVAL = 60
