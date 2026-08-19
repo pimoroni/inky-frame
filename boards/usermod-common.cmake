@@ -3,7 +3,8 @@ set(PIMORONI_PICO_PATH ${CMAKE_CURRENT_LIST_DIR}/../pimoroni-pico)
 endif()
 include(${PIMORONI_PICO_PATH}/pimoroni_pico_import.cmake)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../../)
+# Ahead of PIMORONI_PICO_PATH so our drivers/ win
+include_directories(BEFORE ${CMAKE_CURRENT_LIST_DIR}/..)
 include_directories(${PIMORONI_PICO_PATH}/micropython)
 
 # Drivers, etc
@@ -12,6 +13,8 @@ list(APPEND CMAKE_MODULE_PATH "${PIMORONI_PICO_PATH}")
 list(APPEND CMAKE_MODULE_PATH "${PIMORONI_PICO_PATH}/micropython")
 # All regular modules
 list(APPEND CMAKE_MODULE_PATH "${PIMORONI_PICO_PATH}/micropython/modules")
+# Downstream custom modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/..")
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -23,7 +26,7 @@ include(pimoroni_bus/micropython)
 # Pico Graphics Essential
 include(hershey_fonts/micropython)
 include(bitmap_fonts/micropython)
-include(picographics/micropython)
+include(modules/c/picographics/micropython)
 
 # Pico Graphics Extra
 include(pngdec/micropython)
