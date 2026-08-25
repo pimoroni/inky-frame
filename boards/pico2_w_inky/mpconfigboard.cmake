@@ -2,6 +2,9 @@
 set(MICROPY_BOARD RPI_PICO_W)
 set(PICO_BOARD "pico2_w")
 
+# Leave 50/50 split - 2MB firmware, 2MB user filesystem
+set(MICROPY_HW_FLASH_STORAGE_BYTES 2097152)
+
 # The C malloc is needed by cyw43-driver Bluetooth and Pimoroni Pico modules
 set(MICROPY_C_HEAP_SIZE 4096)
 
