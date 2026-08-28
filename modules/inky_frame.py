@@ -48,18 +48,27 @@ vsys = Pin(HOLD_VSYS_EN)
 vsys.on()
 
 
+# ShiftRegister.read() is MSB-first, wakeup's shift state is LSB-first.
+# The constants above are wakeup's bit positions, so re-pack to match.
+def _read_shift_state():
+    state = 0
+    for i, bit in enumerate(sr):
+        state |= bit << i
+    return state
+
+
 def woken_by_rtc():
     mask = (1 << RTC_ALARM)
-    return bool(sr.read() & mask) or bool(SHIFT_STATE & mask)
+    return bool(_read_shift_state() & mask) or bool(SHIFT_STATE & mask)
 
 
 def woken_by_ext_trigger():
     mask = (1 << EXTERNAL_TRIGGER)
-    return bool(sr.read() & mask) or bool(SHIFT_STATE & mask)
+    return bool(_read_shift_state() & mask) or bool(SHIFT_STATE & mask)
 
 
 def woken_by_button():
-    return bool(sr.read() & 0b11111000) or bool(SHIFT_STATE & 0b11111000)
+    return bool(_read_shift_state() & 0b11111000) or bool(SHIFT_STATE & 0b11111000)
 
 
 def pico_rtc_to_pcf():
