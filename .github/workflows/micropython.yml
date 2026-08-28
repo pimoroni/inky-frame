@@ -10,8 +10,8 @@ jobs:
   build:
     name: MicroPython ${{ matrix.name }}
     runs-on: ubuntu-24.04
-    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         include:
         - name: pico_w_inky
