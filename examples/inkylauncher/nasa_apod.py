@@ -2,102 +2,111 @@ import gc
 from urllib import urequest
 
 import jpegdec
+import pngdec
 from inky_frame import BLACK, RED, WHITE
 from ujson import load
 
-gc.collect()
+"""
+NASA Astronomy Picture of the Day
+
+Fetches the latest APOD from NASA's website, https://science.nasa.gov/apod/
+NASA's image server can resize the image to fit your Inky Frame, so we can download it directly.
+"""
 
 graphics = None
 WIDTH = None
 HEIGHT = None
 
-FILENAME = "nasa-apod-daily"
-
-# A Demo Key is used in this example and is IP rate limited. You can get your own API Key from https://api.nasa.gov/
-API_URL = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"
-
 # Length of time between updates in minutes.
 # Frequent updates will reduce battery life!
 UPDATE_INTERVAL = 240
 
-# Variable for storing the NASA APOD Title
-apod_title = None
+gc.collect()
+
+FILENAME = "nasa-apod-daily"
+
+# The latest APOD post (just its title and image ID)
+POST_URL = "https://science.nasa.gov/wp-json/wp/v2/image-article?categories=22766&per_page=1&_fields=title,featured_media"
+# The URL of an image, given its ID
+MEDIA_URL = "https://science.nasa.gov/wp-json/wp/v2/media/{}?_fields=source_url"
+
+apod_title = "Image Title Unavailable"
+error = None
 
 
-def show_error(text):
-    graphics.set_pen(RED)
-    graphics.rectangle(0, 10, WIDTH, 35)
-    graphics.set_pen(BLACK)
-    graphics.text(text, 5, 16, 400, 2)
+def get_json(url):
+    gc.collect()
+    socket = urequest.urlopen(url)
+    j = load(socket)
+    socket.close()
+    return j
 
 
 def update():
-    global apod_title
+    global apod_title, error
 
-    if HEIGHT == 448:
-        # Image for Inky Frame 5.7
-        IMG_URL = "https://pimoroni.github.io/feed2image/nasa-apod-daily.jpg"
-    elif HEIGHT == 400:
-        # Image for Inky Frame 4.0
-        IMG_URL = "https://pimoroni.github.io/feed2image/nasa-apod-640x400-daily.jpg"
-    elif HEIGHT == 480:
-        # Image for Inky Frame 7.3
-        IMG_URL = "https://pimoroni.github.io/feed2image/nasa-apod-800x480-daily.jpg"
+    error = None
 
     try:
-        # Grab the data
-        socket = urequest.urlopen(API_URL)
-        gc.collect()
-        j = load(socket)
-        socket.close()
-        apod_title = j["title"]
-        gc.collect()
-    except OSError as e:
-        print(e)
-        apod_title = "Image Title Unavailable"
+        post = get_json(POST_URL)[0]
 
-    try:
-        # Grab the image
-        socket = urequest.urlopen(IMG_URL)
+        # Titles look like "APOD: 2026 November 6 &#8211; A Farewell to Swift"
+        title = post["title"]["rendered"]
+        title = title.replace("&#8211;", "-").replace("–", "-").replace("&#8217;", "'")
+        apod_title = title.split(" - ", 1)[-1]
 
-        gc.collect()
+        image_url = get_json(MEDIA_URL.format(post["featured_media"]))["source_url"]
 
+        # Ask NASA to resize the image to fit our display
+        socket = urequest.urlopen(f"{image_url}?w={WIDTH}&h={HEIGHT}")
+
+        # Stream the image data from the socket onto disk in 1024 byte chunks
         data = bytearray(1024)
         with open(FILENAME, "wb") as f:
             while True:
-                if socket.readinto(data) == 0:
+                n = socket.readinto(data)
+                if n == 0:
                     break
-                f.write(data)
+                f.write(data[:n])
         socket.close()
-        del data
         gc.collect()
-    except OSError as e:
+
+    except (OSError, ValueError, KeyError, IndexError) as e:
         print(e)
-        show_error("Unable to download image")
+        error = "Unable to download today's image"
 
 
 def draw():
-    jpeg = jpegdec.JPEG(graphics)
+    global error
+
     gc.collect()  # For good measure...
 
-    graphics.set_pen(WHITE)
+    # Space is black, so fill any gaps around the image with black
+    graphics.set_pen(BLACK)
     graphics.clear()
 
     try:
-        jpeg.open_file(FILENAME)
-        jpeg.decode()
+        # NASA's images can be either JPEG or PNG
+        # PNG files always start with these 4 bytes
+        with open(FILENAME, "rb") as f:
+            is_png = f.read(4) == b"\x89PNG"
+        image = pngdec.PNG(graphics) if is_png else jpegdec.JPEG(graphics)
+
+        # Centre the image on the display
+        image.open_file(FILENAME)
+        image.decode((WIDTH - image.get_width()) // 2, (HEIGHT - image.get_height()) // 2)
     except OSError:
+        error = "Unable to display image"
+
+    if error:
         graphics.set_pen(RED)
-        graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
+        graphics.rectangle(0, 10, WIDTH, 35)
         graphics.set_pen(BLACK)
-        graphics.text("Unable to display image!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
-        graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
+        graphics.text(error, 5, 16, WIDTH, 2)
 
     graphics.set_pen(WHITE)
     graphics.rectangle(0, HEIGHT - 25, WIDTH, 25)
     graphics.set_pen(BLACK)
     graphics.text(apod_title, 5, HEIGHT - 20, WIDTH, 2)
-
-    gc.collect()
 
     graphics.update()
