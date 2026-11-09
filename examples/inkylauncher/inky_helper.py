@@ -84,16 +84,7 @@ def clear_button_leds():
     inky_frame.button_e.led_off()
 
 
-def network_connect(SSID, PSK):
-    # Enable the Wireless
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-
-    # Number of attempts to make before timeout
-    max_wait = 10
-
-    # Sets the Wireless LED pulsing and attempts to connect to your local network.
-    pulse_network_led()
+def _try_connect(wlan, SSID, PSK, max_wait):
     wlan.config(pm=0xa11140)  # Turn WiFi power saving off for some slow APs
     wlan.connect(SSID, PSK)
 
@@ -104,6 +95,27 @@ def network_connect(SSID, PSK):
         print("waiting for connection...")
         time.sleep(1)
 
+    return wlan.status() == 3
+
+
+def network_connect(SSID, PSK):
+    # Enable the Wireless
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+
+    # Sets the Wireless LED pulsing and attempts to connect to your local network.
+    pulse_network_led()
+
+    # A reset while connected can leave the radio unable to reconnect on the next boot,
+    # so if the first attempt fails, power-cycle the radio and try once more.
+    if not _try_connect(wlan, SSID, PSK, 15):
+        print("WiFi connect failed (status %d), resetting radio and retrying" % wlan.status())
+        wlan.disconnect()
+        wlan.active(False)
+        time.sleep(1)
+        wlan.active(True)
+        _try_connect(wlan, SSID, PSK, 15)
+
     stop_network_led()
     network_led_pwm.duty_u16(30000)
 
@@ -111,6 +123,12 @@ def network_connect(SSID, PSK):
     if wlan.status() != 3:
         stop_network_led()
         led_warn.on()
+        return False
+    return True
+
+
+def is_connected():
+    return network.WLAN(network.STA_IF).isconnected()
 
 
 state = {"run": None}

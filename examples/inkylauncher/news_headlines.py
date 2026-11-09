@@ -1,6 +1,7 @@
 import gc
 from urllib import urequest
 
+import inky_helper as ih
 import qrcode
 from inky_frame import BLACK, BLUE, RED, WHITE
 
@@ -109,6 +110,11 @@ def draw_qr_code(ox, oy, size, code):
 
 # A function to get the data from an RSS Feed, this in case BBC News.
 def get_rss():
+    # Without a connection urlopen can block forever and nothing gets drawn,
+    # so bail out and let draw() show the error screen instead.
+    if not ih.is_connected():
+        print("No network connection, skipping feed")
+        return []
     try:
         stream = urequest.urlopen(URL)
         return list(parse_xml_stream(stream, [b"title", b"description", b"guid", b"pubDate"], b"item"))
