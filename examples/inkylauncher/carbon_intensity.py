@@ -27,6 +27,9 @@ POSTCODE = "S9"
 
 URL = "https://api.carbonintensity.org.uk/regional/postcode/" + str(POSTCODE)
 
+# Top of the chart's 100%-of-scale line, below the header text (and room for a % label above a full bar)
+CHART_TOP = 88
+
 
 def update():
     global region, forecast, index, power_list, datetime_to, datetime_from
@@ -61,44 +64,79 @@ def draw():
     graphics.clear()
 
     # draw lines
+    labels = ["biomass", "coal", "imports", "gas", "nuclear", "other", "hydro", "solar", "wind"]
+    bar_colours = [ORANGE, RED, ORANGE, RED, BLUE, ORANGE, GREEN, GREEN, GREEN]
+    bar_w = w / 9
+
+    # Scale the chart to the biggest bar, rounded up to a "nice" maximum,
+    # so small shares are still visible when nothing dominates.
+    biggest = max(power_list) if power_list else 0
+    scale_max = 100
+    for nice in (20, 40, 60, 80, 100):  # quarters of these are all whole numbers
+        if biggest <= nice:
+            scale_max = nice
+            break
+
+    # The chart sits below the header text and above the footer
+    plot_top = CHART_TOP
+    plot_h = h - plot_top
+
+    def y_for(percent):
+        return int(h - percent * plot_h / scale_max)
+
+    # Gridlines at each quarter of the scale (drawn first so bars sit on top)
     graphics.set_pen(BLACK)
-    graphics.line(0, int((h / 100) * 0), w, int((h / 100) * 0))
-    graphics.line(0, int((h / 100) * 50), w, int((h / 100) * 50))
-    graphics.set_font("bitmap8")
-    graphics.text("100%", w - 40, 10, scale=2)
-    graphics.text("50%", w - 40, int((h / 100) * 50 + 10), scale=2)
+    for q in range(5):
+        y = y_for(scale_max * q / 4)
+        graphics.line(0, y, w, y)
 
-    # draw bars
-    bar_colours = [
-        ORANGE,
-        RED,
-        ORANGE,
-        RED,
-        BLUE,
-        ORANGE,
-        GREEN,
-        GREEN,
-        GREEN
-    ]
-    for p in power_list:
-        graphics.set_pen(bar_colours[power_list.index(p)])
-        graphics.rectangle(int(power_list.index(p) * w / 9), int(h - p * (h / 100)),
-                           int(w / 9), int(h / 100 * p))
+    # Bars
+    for i, p in enumerate(power_list):
+        graphics.set_pen(bar_colours[i])
+        top = y_for(p)
+        graphics.rectangle(int(i * bar_w), top, int(bar_w), h - top)
 
-    # draw labels
+    # Rotated fuel names, once thick in white as a halo, then in black
     graphics.set_font("sans")
-    # once in white for a background
-    graphics.set_pen(WHITE)
-    labels = ["biomass", "coal", "imports", "gas", "nuclear", "other", "hydro", "solar", "wind"]
-    graphics.set_thickness(4)
-    for label in labels:
-        graphics.text(f"{label}", int((labels.index(label) * w / 9) + (w / 9) / 2), h - 10, angle=270, scale=1)
-    # again in black
-    graphics.set_pen(BLACK)
-    labels = ["biomass", "coal", "imports", "gas", "nuclear", "other", "hydro", "solar", "wind"]
-    graphics.set_thickness(2)
-    for label in labels:
-        graphics.text(f"{label}", int((labels.index(label) * w / 9) + (w / 9) / 2), h - 10, angle=270, scale=1)
+    for pen, thickness in ((WHITE, 4), (BLACK, 2)):
+        graphics.set_pen(pen)
+        graphics.set_thickness(thickness)
+        for i, label in enumerate(labels):
+            graphics.text(label, int(i * bar_w + bar_w / 2), h - 10, angle=270, scale=1)
+
+    # Work out where each bar's percentage label goes: above the bar, or above
+    # the rotated fuel name if the bar is shorter than the name.
+    graphics.set_font("sans")
+    name_tops = [h - 10 - graphics.measure_text(label, 1) for label in labels]
+    graphics.set_font("bitmap8")
+    pct_labels = []
+    for i, p in enumerate(power_list):
+        text = ("%d%%" if p == int(p) else "%.1f%%") % p
+        text_w = graphics.measure_text(text, 2)
+        y = min(y_for(p), name_tops[i]) - 20
+        x = int(i * bar_w + (bar_w - text_w) / 2)
+        pct_labels.append((text, x, y, text_w))
+
+    # Gridline labels on the right, on a white background so they're readable over the bars.
+    # Skip any that would collide with the rightmost bar's percentage label.
+    last_y = pct_labels[-1][2] if pct_labels else -100
+    for q in range(1, 5):
+        text = "%d%%" % (scale_max * q // 4)
+        text_w = graphics.measure_text(text, 2)
+        y = y_for(scale_max * q / 4) + 3
+        if abs(y - last_y) < 20:
+            continue
+        graphics.set_pen(WHITE)
+        graphics.rectangle(w - text_w - 6, y - 1, text_w + 6, 18)
+        graphics.set_pen(BLACK)
+        graphics.text(text, w - text_w - 3, y, scale=2)
+
+    # Percentage labels
+    for text, x, y, text_w in pct_labels:
+        graphics.set_pen(WHITE)
+        graphics.rectangle(x - 2, y - 1, text_w + 4, 18)
+        graphics.set_pen(BLACK)
+        graphics.text(text, x, y, scale=2)
 
     # draw header
     graphics.set_thickness(3)
