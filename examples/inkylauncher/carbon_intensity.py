@@ -115,28 +115,39 @@ def draw():
     graphics.set_font("bitmap8")
     pct_labels = []
     for i, p in enumerate(power_list):
+        if p == 0:  # no label for fuels that aren't contributing
+            continue
         text = ("%d%%" if p == int(p) else "%.1f%%") % p
         text_w = graphics.measure_text(text, 2)
         y = min(y_for(p), name_tops[i]) - 20
         x = int(i * bar_w + (bar_w - text_w) / 2)
-        pct_labels.append((text, x, y, text_w))
+        pct_labels.append((i, text, x, y, text_w))
 
     # Gridline labels on the right, on a white background so they're readable over the bars.
-    # Skip any that would collide with the rightmost bar's percentage label.
-    last_y = pct_labels[-1][2] if pct_labels else -100
+    # They normally sit just below their line; if that would collide with the rightmost
+    # bar's percentage label, move above the line instead (or skip if both collide).
+    last = len(labels) - 1
+    right_ys = [y for i, _, _, y, _ in pct_labels if i == last]
+
+    def clashes(y):
+        return any(abs(y - ry) < 20 for ry in right_ys)
+
     for q in range(1, 5):
         text = "%d%%" % (scale_max * q // 4)
         text_w = graphics.measure_text(text, 2)
-        y = y_for(scale_max * q / 4) + 3
-        if abs(y - last_y) < 20:
-            continue
+        line_y = y_for(scale_max * q / 4)
+        y = line_y + 3
+        if clashes(y):
+            y = line_y - 19
+            if clashes(y):
+                continue
         graphics.set_pen(WHITE)
         graphics.rectangle(w - text_w - 6, y - 1, text_w + 6, 18)
         graphics.set_pen(BLACK)
         graphics.text(text, w - text_w - 3, y, scale=2)
 
     # Percentage labels
-    for text, x, y, text_w in pct_labels:
+    for _, text, x, y, text_w in pct_labels:
         graphics.set_pen(WHITE)
         graphics.rectangle(x - 2, y - 1, text_w + 4, 18)
         graphics.set_pen(BLACK)
