@@ -22,8 +22,12 @@ HEIGHT = None
 # Frequent updates will reduce battery life!
 UPDATE_INTERVAL = 240
 
-# Set (the first half) of your UK postcode here
-POSTCODE = "S9"
+# Set (the first half) of your UK postcode as CARBON_POSTCODE in secrets.py,
+# e.g. CARBON_POSTCODE = "S9", or change the default here.
+try:
+    from secrets import CARBON_POSTCODE as POSTCODE
+except ImportError:
+    POSTCODE = "S9"
 
 URL = "https://api.carbonintensity.org.uk/regional/postcode/" + str(POSTCODE)
 
