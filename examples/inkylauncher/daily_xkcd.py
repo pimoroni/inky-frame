@@ -1,6 +1,8 @@
 import gc
+import time
 from urllib import urequest
 
+import inky_helper as ih
 import jpegdec
 import machine
 import sdcard
@@ -30,13 +32,34 @@ gc.collect()  # We're really gonna need that RAM!
 FILENAME = "/sd/xkcd-daily.jpg"
 ENDPOINT = "https://pimoroni.github.io/feed2image/xkcd-daily.jpg"
 
-sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))
-sd = sdcard.SDCard(sd_spi, machine.Pin(22))
-uos.mount(sd, "/sd")
+
+def mount_sd(attempts=3):
+    # The SD card shares SPI0 with the display; make sure the display's
+    # chip select (GP17) is released so it doesn't interfere with card init.
+    machine.Pin(17, machine.Pin.OUT).value(1)
+    for attempt in range(attempts):
+        try:
+            sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))
+            sd = sdcard.SDCard(sd_spi, machine.Pin(22))
+            uos.mount(sd, "/sd")
+            return
+        except OSError as e:
+            print("SD mount attempt %d failed: %r" % (attempt + 1, e))
+            if attempt == attempts - 1:
+                raise
+            time.sleep(0.5)
+
+
+mount_sd()
 gc.collect()  # Claw back some RAM!
 
 
 def update():
+    # Without a connection urlopen can block forever; keep the last saved comic instead.
+    if not ih.is_connected():
+        print("No network connection, skipping download")
+        return
+
     url = ENDPOINT
 
     if (WIDTH, HEIGHT) != (600, 448):

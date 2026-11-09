@@ -11,6 +11,7 @@ Make sure to uncomment the correct size for your display!
 
 """
 
+import inky_helper as ih
 import urequests
 from inky_frame import BLACK, BLUE, GREEN, ORANGE, RED, WHITE
 
@@ -28,30 +29,37 @@ POSTCODE = "S9"
 URL = "https://api.carbonintensity.org.uk/regional/postcode/" + str(POSTCODE)
 
 
+region = None  # stays None until we've had a successful update
+
+
 def update():
     global region, forecast, index, power_list, datetime_to, datetime_from
-    print(f"Requesting URL: {URL}")
-    r = urequests.get(URL)
-    # open the json data
-    j = r.json()
-    print("Data obtained!")
-    print(j)
 
-    # parse the json data
-    region = j["data"][0]["shortname"]
+    # Without a connection the request can block forever; keep any previous data instead.
+    if not ih.is_connected():
+        print("No network connection, skipping update")
+        return
 
-    forecast = j["data"][0]["data"][0]["intensity"]["forecast"]
-    index = j["data"][0]["data"][0]["intensity"]["index"]
+    try:
+        print(f"Requesting URL: {URL}")
+        r = urequests.get(URL)
+        # open the json data
+        j = r.json()
+        # close the socket
+        r.close()
+        print("Data obtained!")
+        print(j)
 
-    power_list = []
-    for power in j["data"][0]["data"][0]["generationmix"]:
-        power_list.append(power["perc"])
-
-    datetime_to = j["data"][0]["data"][0]["to"].split("T")
-    datetime_from = j["data"][0]["data"][0]["from"].split("T")
-
-    # close the socket
-    r.close()
+        # parse the json data
+        data = j["data"][0]["data"][0]
+        power_list = [power["perc"] for power in data["generationmix"]]
+        forecast = data["intensity"]["forecast"]
+        index = data["intensity"]["index"]
+        datetime_to = data["to"].split("T")
+        datetime_from = data["from"].split("T")
+        region = j["data"][0]["shortname"]  # set last, so a partial parse doesn't count as success
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as e:  # network errors, bad JSON, unexpected response
+        print("Carbon Intensity update failed:", e)
 
 
 def draw():
@@ -59,6 +67,16 @@ def draw():
     w, h = WIDTH, HEIGHT
     graphics.set_pen(WHITE)
     graphics.clear()
+
+    if region is None:
+        graphics.set_font("bitmap8")
+        graphics.set_pen(RED)
+        graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
+        graphics.set_pen(WHITE)
+        graphics.text("Unable to get Carbon Intensity data!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
+        graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
+        graphics.update()
+        return
 
     # draw lines
     graphics.set_pen(BLACK)
